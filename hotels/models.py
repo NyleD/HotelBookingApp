@@ -7,18 +7,20 @@ class Customer(models.Model):
     user = models.OneToOneField(User, blank=True, null=True, on_delete=models.CASCADE)
     
 class Room(models.Model):
-    room_num =  models.IntegerField(unique=True)
-    customer = models.ForeignKey(Customer, related_name='rooms', null=True, on_delete=SET_NULL)
-    booked = models.BooleanField(default=False)
+    room_num = models.IntegerField(unique=True)
+    beds = models.IntegerField(default=1, validators=[MaxValueValidator(3), MinValueValidator(1)])
+    view = models.CharField(max_length=50, default="None")
+    luxury = models.CharField(max_length=50, default="None")
+
+class Bookings(models.Model):
+    book_id = models.IntegerField(unique=True)
+    customer = models.ForeignKey(Customer, related_name='bookings', null=True, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, related_name='bookings', null=True, on_delete=models.CASCADE)
+    numguests = models.IntegerField(default=1)
+    cancelled = models.BooleanField(default=False)
     checkin = models.DateField(auto_now=False, null=True)
     checkout = models.DateField(auto_now=False, null=True)
 
-class Amentie(models.Model):
-    room = models.OneToOneField(Room,related_name='amentie', on_delete=models.CASCADE)
-    beds = models.IntegerField(default=1,
-                               validators=[MaxValueValidator(3), MinValueValidator(1)])
-    view = models.CharField(max_length=50)
-    luxury = models.CharField(max_length=50)
 
 
 
