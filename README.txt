@@ -3,6 +3,9 @@ Connecting to Cloud SQL Instance and running Django:
 ./cloud_sql_proxy -instances=[INSTANCENAMEONDB]=tcp:5433
 python3 manage.py runserver
 
+Expecting the Frontend to run at:
+localhost:3000/
+
 
 MORE Info on how to populate the DB....
 
