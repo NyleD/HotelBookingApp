@@ -37,10 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders', 
+    'rest_framework',
     'hotels',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -85,7 +88,7 @@ if os.getenv('GAE_APPLICATION', None):
             'HOST': '/cloudsql/cs343demo1:us-central1:cs348demo-db',
             'USER': 'nyle',
             'PASSWORD': 'cs348isthebest',
-            'NAME': 'bookbookgo_db',
+            'NAME': 'production',
         }
     }
 else:
@@ -98,7 +101,7 @@ else:
             'ENGINE': 'django.db.backends.mysql',
             'HOST': '127.0.0.1',
             'PORT': '5433',
-            'NAME': 'bookbookgo_db',
+            'NAME': 'production',
             'USER': 'nyle', 
             'PASSWORD': 'cs348isthebest',
         }

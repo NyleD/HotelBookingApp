@@ -1,6 +1,24 @@
 from django.shortcuts import render
+from rest_framework import viewsets          
+from .serializers import CustomerSerializer, RoomSerializer, BookingSerializer     
+from .models import Customer, Room, Booking
+
+class CustomerView(viewsets.ModelViewSet): 
+      serializer_class = CustomerSerializer          
+      queryset = Customer.objects.all()              
+
+class RoomView(viewsets.ModelViewSet):       
+      serializer_class = RoomSerializer          
+      queryset = Room.objects.all()  
+
+class BookingView(viewsets.ModelViewSet):       
+      serializer_class = BookingSerializer          
+      queryset = Booking.objects.all() 
+
+                
 
 
+"""
 # 7 features implmented -> just need to call queries in the front-end
 
 def get_customer(request) :
@@ -45,4 +63,4 @@ def book(request) :
 
         cursor = connection.cursor()
         cursor.execute('''UPDATE `hotels_room` SET `customer_id` = %d WHERE `hotels_room`.`id` IN (%d)', 'time': %s''', [room_num], [cus_id], [time])
-    
+"""
