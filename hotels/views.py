@@ -2,6 +2,8 @@ from django.shortcuts import render
 from rest_framework import viewsets          
 from .serializers import CustomerSerializer, RoomSerializer, BookingSerializer     
 from .models import Customer, Room, Booking
+from django.core import serializers
+from django.http import HttpResponse
 
 class CustomerView(viewsets.ModelViewSet): 
       serializer_class = CustomerSerializer          
@@ -15,52 +17,50 @@ class BookingView(viewsets.ModelViewSet):
       serializer_class = BookingSerializer          
       queryset = Booking.objects.all() 
 
-                
+# Filtering and Adding a Booking Part Queries
 
+def filterRooms(request):
+          serializer_class = RoomSerializer
+          queryset = Room.objects.all()
+          room_id = request.GET.get('room_id',None)
+          beds = request.GET.get('beds',None)
+          view = request.GET.get('view',None)
+          luxury = request.GET.get('luxury',None)
+
+          if beds and view and luxury:
+              queryset = queryset.filter(beds = beds, view = view, luxury = luxury)
+          elif room_id:
+              queryset = queryset.filter(id = room_id)
+          qs_json = serializers.serialize('json',queryset)
+          return HttpResponse(qs_json, content_type='application/json')
+
+def filterBookings(request):
+          serializer_class = BookingSerializer
+          room_id = request.GET.get('room_id',None)
+          mycheckin = request.GET.get('checkin',None)
+          mycheckout = request.GET.get('checkout',None)
+
+          if room_id and mycheckin and mycheckout:
+              queryset = Booking.objects.raw('''SELECT * from hotels_booking
+                       where room_id = %s and
+                       checkin < %s and
+                       checkout > %s ''', [room_id, mycheckout, mycheckin])
+              qs_json = serializers.serialize('json',queryset)
+              return HttpResponse(qs_json, content_type='application/json')
+
+def filterCustomers(request):
+          serializer_class = CustomerSerializer
+          name = request.GET.get('name',None)
+          email = request.GET.get('email',None)
+
+          if name and email:
+              queryset = Customer.objects.raw('''SELECT id from hotels_customer
+                       where name = %s and
+                       email = %s''', [name, email])
+              qs_json = serializers.serialize('json',queryset)
+              return HttpResponse(qs_json, content_type='application/json')
 
 """
-# 7 features implmented -> just need to call queries in the front-end
-
-def get_customer(request) :
-
-    # 1
-    user = request.user
-    cursor = connection.cursor()
-    cursor.execute('''SELECT `auth_user`.`id`, `auth_user`.`password`, `auth_user`.`last_login`, `auth_user`.`is_superuser`, `auth_user`.`username`, `auth_user`.`first_name`, `auth_user`.`last_name`, `auth_user`.`email`, `auth_user`.`is_staff`, `auth_user`.`is_active`, `auth_user`.`date_joined` FROM `auth_user` WHERE `auth_user`.`username` = %s''', [user])
-    row = cursor.fetchone()
-
-    print row
-
-    context = {"row":row}
-    return render(request, "customer.html", context)
-
-
-def get_hotels(request) :
-
-    # 2
-    cursor = connection.cursor()
-    if request.booking == True: # Display Booked or Unbooked Homes 
-        booked = request.booking
-        cursor.execute('''SELECT `hotels_room`.`id`, `hotels_room`.`room_num`, `hotels_room`.`customer_id`, `hotels_room`.`booked`, `hotels_room`.`checkin`, `hotels_room`.`checkout` FROM `hotels_room` WHERE `hotels_room`.`booked` = %s''', [booked])
-    # 3
-    else:
-        # Display all Rooms
-        cursor.execute('''SELECT `hotels_room`.`id`, `hotels_room`.`room_num`, `hotels_room`.`customer_id`, `hotels_room`.`booked`, `hotels_room`.`checkin`, `hotels_room`.`checkout` FROM `hotels_room`''')
-
-    row = cursor.fetchone()
-    print row
-    context = {"row":row}
-    return render(request, "rooms.html", context)
-
-
-def book(request) :
-
-    # 4
-    if request.book == True: # Display Booked or Unbooked Homes 
-        room_num = request.room_num
-        cus_id = request.customer_id
-        time = request.timestamp
-
-        cursor = connection.cursor()
-        cursor.execute('''UPDATE `hotels_room` SET `customer_id` = %d WHERE `hotels_room`.`id` IN (%d)', 'time': %s''', [room_num], [cus_id], [time])
+Removed the features below this as they were regarding the old DB schema
 """
+

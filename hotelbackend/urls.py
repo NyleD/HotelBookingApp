@@ -24,8 +24,10 @@ router.register(r'rooms', views.RoomView, 'room')
 router.register(r'bookings', views.BookingView, 'booking')
 
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls))
+    path('api/', include(router.urls)),
+    path('filterRooms', views.filterRooms),
+    path('filterBookings', views.filterBookings),
+    path('filterCustomers', views.filterCustomers)
 ]
