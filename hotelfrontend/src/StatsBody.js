@@ -3,6 +3,7 @@ import React from 'react';
 import stat1 from './images/stat1.png';
 import stat2 from './images/stat2.png';
 import stat3 from './images/stat3.png';
+import Rating from '@material-ui/lab/Rating';
 
 export class StatsBody extends React.Component {
 
@@ -13,13 +14,13 @@ export class StatsBody extends React.Component {
             <div className="container">
             <div className="d-flex justify-content-center">
                 <div className="row">
-                    <div style={{marginTop: '60px'}}> 
-                        <h6>The hotel's average rating:</h6>
+                    <div style={{marginTop: '30px'}}> 
+                        <h6>Hotel average rating:</h6>
                     </div>
                 </div>
             </div>
             <div className="d-flex justify-content-center" style={{marginBottom: '60px'}}>
-                <div className="row">__</div>
+                <Rating name="half-rating-read" defaultValue={2.5} precision={0.5} readOnly size="large" />
             </div>
                 <div className="row justify-content-center">
                     <div class="card-deck">
