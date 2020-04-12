@@ -1,6 +1,8 @@
 import React from 'react';
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import { Header } from './Header.js';
 import { AppBody } from "./AppBody";
+import { MyBookings } from "./MyBookings";
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './App.css';
@@ -23,8 +25,13 @@ export class App extends React.Component {
   render() {
     return (
         <React.Fragment>
-          <Header/>
-          <AppBody/>
+			<Header/>
+			<Router>
+				<Switch>
+					<Route exact path="/" component={AppBody} />
+					<Route path="/MyBookings" component={MyBookings} />
+				</Switch>
+			</Router>
         </React.Fragment>
     );
   }
