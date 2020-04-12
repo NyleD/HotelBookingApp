@@ -1,103 +1,42 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
-  pointer-events: none;
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.grad {
-  background-image: linear-gradient(to right, #1d5f8f, seagreen);
-  color: white;
-  font-family: Arial;
-  text-align: center;
-  padding: 25px;
-  display: block;
-}
-
 .searchInput {
-  margin: 25px;
-  width: 85%;
-  height: 40px;
-  border: 2px solid lightgray;
-  border-radius: 4px;
-  float: left;
-}
+   margin: 25px;
+   width: 85%;
+   height: 40px;
+   border: 2px solid lightgray;
+   border-radius: 4px;
+   float: left;
+ }
 
-.searchBtn {
-  width : 100%;
-  float: left;
-}
+ .searchBtn {
+   width : 100%;
+   float: left;
+ }
 
-.titleDisplay {
-  display: inline-block;
-  vertical-align: top;
-}
+ .titleDisplay {
+   display: inline-block;
+   vertical-align: top;
+ }
 
-.minty {
-  background-color: mintcream;
-}
+ .minty {
+   background-color: mintcream;
+ }
 
-.favsBar {
-  color: seagreen;
-  font-family: Arial;
-  text-align: left;
-  padding: 25px;
-  display: block;
-}
+ .favsBar {
+   color: seagreen;
+   font-family: Arial;
+   text-align: left;
+   padding: 25px;
+   display: block;
+ }
 
+ .btn {
+   max-width: 100%;
+ }
 
-.btn {
-  max-width: 100%;
-}
-
-.recycleLoading {
-  color: seagreen;
-}
-
-.threeR {
-  align-content: center;
-}
-
-.bluebin {
-  color: #1d5f8f;
-}
-
-.greenbin {
-  color: darkgreen;
-}
-
-.garbagebin {
-  color: saddlebrown;
-}
-
-.bins {
-  height: 40px;
-  padding-bottom: 10px;
-}
+ .footer {
+   position: fixed;
+   left: 0;
+   bottom: 0;
+   width: 100%;
+   text-align: center;
+ }

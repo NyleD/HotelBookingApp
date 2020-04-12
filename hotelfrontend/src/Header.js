@@ -1,4 +1,5 @@
 import React from 'react';
+import logo from './images/logo.png';
 
 
 export class Header extends React.Component {
@@ -6,10 +7,9 @@ export class Header extends React.Component {
     render(){
         return (
             <div>
-            <h2 className="grad"><strong>
-                Book Book Go
-            </strong>
-            </h2>
+            <a href="http://localhost:3000/">
+            <img class="mx-auto d-block" src={logo} alt="logo" width="200" height="200"/>
+            </a>
             </div>
         )
     }

@@ -1,26 +1,15 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import { Header } from './Header.js';
-import { AppBody } from "./AppBody";
+import { Header } from "./Header";
+import { Footer } from "./Footer";
+import { HomePage } from "./HomePage";
+import { AddBooking } from "./AddBooking";
 import { MyBookings } from "./MyBookings";
 import { StatsBody } from "./StatsBody";
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './App.css';
 import './index.css';
-
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faStar } from '@fortawesome/free-solid-svg-icons'
-import { faSearch } from '@fortawesome/free-solid-svg-icons'
-import { faRecycle } from '@fortawesome/free-solid-svg-icons'
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
-
-library.add(faStar);
-library.add(faSearch);
-library.add(faRecycle);
-library.add(faTrash);
-
-
 
 export class App extends React.Component {
   render() {
@@ -29,11 +18,13 @@ export class App extends React.Component {
 			<Header/>
 			<Router>
 				<Switch>
-					<Route exact path="/" component={AppBody} />
+					<Route exact path="/" component={HomePage} />
+					<Route exact path="/Search" component={AddBooking} />
 					<Route path="/MyBookings" component={MyBookings} />
 					<Route path="/Stats" component={StatsBody} />
 				</Switch>
 			</Router>
+			<Footer/>
         </React.Fragment>
     );
   }
