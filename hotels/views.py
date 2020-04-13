@@ -128,7 +128,7 @@ def modifyBooking(request):
               Booking.objects.filter(id=booking_id).update(numguests=numguests,cancelled=cancelled,
                 checkin=checkin, checkout=checkout, customer_id=customer_id,room_id=room_id,rating=rating)
 
-              qs_json = serializers.serialize('json',Booking.objects.filter(id=booking_id))
+              qs_json = json.loads(serializers.serialize('json',Booking.objects.filter(id=booking_id)))
               return HttpResponse(qs_json, content_type='application/json')
 
 
