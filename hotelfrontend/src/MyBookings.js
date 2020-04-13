@@ -17,6 +17,8 @@ import Button from '@material-ui/core/Button';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import Snackbar from '@material-ui/core/Snackbar';
+import Alert from '@material-ui/lab/Alert';
 import Rating from '@material-ui/lab/Rating';
 
 import CreateIcon from '@material-ui/icons/Create';
@@ -38,6 +40,7 @@ export class MyBookings extends React.Component {
 		validDates: true,
 		validGuests: true,
 		isShowAll: true,
+		bookingError: false,
 	};
 
 	componentDidMount() {
@@ -62,6 +65,7 @@ export class MyBookings extends React.Component {
 					bookingData: data,
 					isDialogOpen: false,
 					customer: this.state.newCustomer,
+					bookingError: false,
 				});
 			});
 	};
@@ -75,6 +79,13 @@ export class MyBookings extends React.Component {
 				});
 			})
 	};
+
+	openErrorSnackbar() {
+		this.setState({
+			bookingError: true,
+			isDialogOpen: false,
+		});
+	}
 
 	stringToDate(s) {
 		return Date.UTC(parseInt(s.substring(0, 4)), parseInt(s.substring(5, 7))-1, parseInt(s.substring(8, 10)));
@@ -174,7 +185,11 @@ export class MyBookings extends React.Component {
 			}).then((response) => { return response.json(); })
 			.then((data) => {
 				console.log(data);
-				this.fetchBookings();
+				if (data.result == "Fail") {
+					this.openErrorSnackbar();
+				} else if (data.result == "Success") {
+					this.fetchBookings();
+				}
 			});
 		};
 
@@ -278,7 +293,11 @@ export class MyBookings extends React.Component {
 			}).then((response) => { return response.json(); })
 			.then((data) => {
 				console.log(data);
-				this.fetchBookings();
+				if (data.result == "Fail") {
+					this.openErrorSnackbar();
+				} else if (data.result == "Success") {
+					this.fetchBookings();
+				}
 			});
 		};
 
@@ -300,7 +319,11 @@ export class MyBookings extends React.Component {
 			}).then((response) => { return response.json(); })
 			.then((data) => {
 				console.log(data);
-				this.fetchBookings();
+				if (data.result == "Fail") {
+					this.openErrorSnackbar();
+				} else if (data.result == "Success") {
+					this.fetchBookings();
+				}
 			});
 		};
 
@@ -412,6 +435,28 @@ export class MyBookings extends React.Component {
 		);
 	};
 
+	renderSnackbar() {
+		const { bookingError } = this.state;
+
+		const closeSnackbar = (event) => {
+			this.setState({
+				bookingError: false,
+			});
+		};
+
+		return (
+			<Snackbar
+				open={bookingError}
+				autoHideDuration={5000}
+				onClose={closeSnackbar}
+			>
+				<Alert onClose={closeSnackbar} severity="error">
+					The changes conflict with another booking.
+				</Alert>
+			</Snackbar>
+		);
+	};
+
 	render() {
 		return(
 			<div style={{ "textAlign":"center" }}>
@@ -419,6 +464,7 @@ export class MyBookings extends React.Component {
 				{ this.renderFilter() }
 				{ this.renderTable() }
 				{ this.renderDialog() }
+				{ this.renderSnackbar() }
 			</div>
 		);
 	};
