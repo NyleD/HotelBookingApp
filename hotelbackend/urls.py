@@ -21,7 +21,7 @@ from hotels import views
 router = routers.DefaultRouter()
 router.register(r'customers', views.CustomerView, 'customer')
 router.register(r'rooms', views.RoomView, 'room')
-router.register(r'bookings', views.RoomView, 'room')
+router.register(r'bookings', views.BookingView, 'booking')
 
 
 
@@ -32,5 +32,5 @@ urlpatterns = [
     path('filterRooms', views.filterRooms),
     path('filterBookings', views.filterBookings),
     path('filterCustomers', views.filterCustomers),
-    
+    path('modifyBooking',views.modifyBooking)
 ]

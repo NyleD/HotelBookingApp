@@ -4,8 +4,10 @@ from .serializers import CustomerSerializer, RoomSerializer, BookingSerializer
 from .models import Customer, Room, Booking
 from django.core import serializers
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 import django_filters.rest_framework
 from rest_framework import generics
+import json
 
 class CustomerView(viewsets.ModelViewSet): 
       serializer_class = CustomerSerializer          
@@ -75,6 +77,60 @@ def filterCustomers(request):
                        email = %s''', [name, email])
               qs_json = serializers.serialize('json',queryset)
               return HttpResponse(qs_json, content_type='application/json')
+
+@csrf_exempt
+def modifyBooking(request):
+          if request.method == 'PUT':
+              
+              json_data = json.loads(request.body)
+              # print(json_data)
+              if 'booking_id' not in json_data:
+                  raise ValueError("No booking_id in given json data")
+              if 'numguests' not in json_data:
+                  raise ValueError("No numguests in given json data")
+              if 'cancelled' not in json_data:
+                  raise ValueError("No cancelled in given json data")
+              if 'checkin' not in json_data:
+                  raise ValueError("No checkin in given json data")
+              if 'checkout' not in json_data:
+                  raise ValueError("No checkout in given json data")
+              if 'customer_id' not in json_data:
+                  raise ValueError("No customer_id in given json data")
+              if 'room_id' not in json_data:
+                  raise ValueError("No room_id in given json data")
+              if 'rating' not in json_data:
+                  raise ValueError("No rating in given json data")
+              
+
+              booking_id = json_data["booking_id"]
+              numguests = json_data["numguests"]
+              cancelled = json_data["cancelled"]
+              checkin = json_data["checkin"]
+              checkout = json_data["checkout"]
+              customer_id = json_data["customer_id"]
+              room_id = json_data["room_id"]
+              rating = json_data["rating"]
+
+
+              overbook = False
+              booking_for_the_room = json.loads(serializers.serialize('json',Booking.objects.filter(room_id=room_id)))
+              for b in booking_for_the_room:
+                checkin_date = b["fields"]["checkin"]
+                checkout_date = b["fields"]["checkout"]
+                b_id = b["pk"]
+                b_cancelled = b["fields"]["cancelled"]
+                if(b_id == booking_id or b_cancelled == True): continue
+                if(checkin <= checkout_date and checkin_date <= checkout):
+                  # there is overlap
+                  qs_json = json.dumps({"result":"Fail", "Conflict" : b})
+                  return HttpResponse(qs_json, content_type='application/json')
+
+              Booking.objects.filter(id=booking_id).update(numguests=numguests,cancelled=cancelled,
+                checkin=checkin, checkout=checkout, customer_id=customer_id,room_id=room_id,rating=rating)
+
+              qs_json = serializers.serialize('json',Booking.objects.filter(id=booking_id))
+              return HttpResponse(qs_json, content_type='application/json')
+
 
 """
 Removed the features below this as they were regarding the old DB schema
