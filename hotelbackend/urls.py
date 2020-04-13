@@ -32,5 +32,5 @@ urlpatterns = [
     path('filterRooms', views.filterRooms),
     path('filterBookings', views.filterBookings),
     path('filterCustomers', views.filterCustomers),
-    path('modifyBooking',views.modifyBooking)
+    path('api/modifyBooking',views.modifyBooking)
 ]
