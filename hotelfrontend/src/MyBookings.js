@@ -22,8 +22,8 @@ import Rating from '@material-ui/lab/Rating';
 import CreateIcon from '@material-ui/icons/Create';
 import CloseIcon from '@material-ui/icons/Close';
 
-const urlBookings = "http://127.0.0.1:8000/api/bookings/";
-const urlRooms = "http://127.0.0.1:8000/api/rooms/";
+const urlBookings = "http://127.0.0.1:8000/api/bookings";
+const urlRooms = "http://127.0.0.1:8000/api/rooms";
 
 export class MyBookings extends React.Component {
 	state = {
@@ -35,6 +35,7 @@ export class MyBookings extends React.Component {
 		rooms: [],
 		validDates: true,
 		validGuests: true,
+		isShowAll: true,
 	};
 
 	componentDidMount() {
@@ -42,8 +43,8 @@ export class MyBookings extends React.Component {
 	};
 
 	fetchData() {
-		this.fetchBookings(this.state.customer)
-			.then(() => { return this.fetchRooms(); })
+		this.fetchBookings()
+			.then(() => { this.fetchRooms(); })
 			.then(() => {
 				this.setState({
 					isLoading: false,
@@ -51,8 +52,8 @@ export class MyBookings extends React.Component {
 			});
 		};
 
-	fetchBookings(customer) {
-		return fetch(urlBookings)
+	fetchBookings() {
+		return fetch(urlBookings+"?customer="+this.state.customer)
 			.then((response) => { return response.json(); })
 			.then((data) => {
 				this.setState({
@@ -76,27 +77,52 @@ export class MyBookings extends React.Component {
 	};
 
 	renderFilter() {
-		const filterById = (event) => {
+		const { isShowAll } = this.state;
+		const customerChanged = (event) => {
 			this.setState({
 				customer: event.target.value,
-				//isLoading: true,
 			});
-			//this.fetchBookings(event.target.value);
-		}
+		};
+
+		const refreshBookings = (event) => {
+			this.fetchBookings();
+		};
+
+		const toggleDisplay = (event) => {
+			this.setState({
+				isShowAll: !isShowAll,
+			});
+		};
 
 		return(
-			<TextField
-				id="outlined-basic"
-				label="User ID"
-				style={{ margin: 10 }}
-				value={this.state.customer}
-				onChange={filterById}
-			/>
+			<div>
+				<TextField
+					id="outlined-basic"
+					label="User ID"
+					style={{ margin: 10 }}
+					value={this.state.customer}
+					onChange={customerChanged}
+				/>
+				<Button
+					variant="contained"
+					color="primary"
+					onClick={refreshBookings}
+				>
+					Refresh Bookings
+				</Button>
+				<Button
+					variant="contained"
+					color="default"
+					onClick={toggleDisplay}
+				>
+					{ isShowAll ? "Hide" : "Show" } Inactive Bookings
+				</Button>
+			</div>
 		);
 	};
 
 	renderTable() {
-		const { isLoading, bookingData, customer } = this.state;
+		const { isLoading, bookingData, customer, isShowAll } = this.state;
 		
 		const openDialog = (event, row) => {
 			this.setState({
@@ -135,43 +161,44 @@ export class MyBookings extends React.Component {
 					</TableHead>
 					<TableBody>{ !isLoading ?
 						bookingData.map((row) => {
-							if (row.customer == customer) {
-								return(
-									<TableRow key={row.id} selected={!isEditable(row.cancelled, row.checkin)} >
-										<TableCell size="small">
-											<IconButton
-												onClick={(event) => openDialog(event, row)}
-												hidden={!isEditable(row.cancelled, row.checkin)}
-											>
-												<CreateIcon />
-											</IconButton>
-										</TableCell>
-										<TableCell>{ row.checkin }</TableCell>
-										<TableCell>{ row.checkout }</TableCell>
-										<TableCell>{ row.room }</TableCell>
-										<TableCell>{ row.numguests }</TableCell>
-										<TableCell>{ row.cancelled ? "Cancelled" : (isEditable(row.cancelled, row.checkin) ? "Upcoming" : "Completed") }</TableCell>
-										<TableCell>
-											<Rating
-												name="bookingRating"
-												hidden={row.cancelled ? true : (isEditable(row.cancelled, row.checkin) ? true : false)}
-												value={ row.rating }
-												onChange={(event, newValue) => {
-													fetch(urlBookings, {
-														method: "PUT",
-														body: {...this.state.dialogData,
-															rating: newValue,
-														},
-													}).then((response) => {
-														this.fetchData();
-													});
-												}}
-											/>
-										</TableCell>
-									</TableRow>
-								);
-							}
-							return null;
+							return(
+								<TableRow
+									key={row.id}
+									selected={!isEditable(row.cancelled, row.checkin)}
+									hidden={!isShowAll && !isEditable(row.cancelled, row.checkin)}
+								>
+									<TableCell size="small">
+										<IconButton
+											onClick={(event) => openDialog(event, row)}
+											hidden={!isEditable(row.cancelled, row.checkin)}
+										>
+											<CreateIcon />
+										</IconButton>
+									</TableCell>
+									<TableCell>{ row.checkin }</TableCell>
+									<TableCell>{ row.checkout }</TableCell>
+									<TableCell>{ row.room }</TableCell>
+									<TableCell>{ row.numguests }</TableCell>
+									<TableCell>{ row.cancelled ? "Cancelled" : (isEditable(row.cancelled, row.checkin) ? "Upcoming" : "Completed") }</TableCell>
+									<TableCell>
+										<Rating
+											name="bookingRating"
+											hidden={row.cancelled ? true : (isEditable(row.cancelled, row.checkin) ? true : false)}
+											value={ row.rating }
+											onChange={(event, newValue) => {
+												fetch(urlBookings, {
+													method: "PUT",
+													body: {...this.state.dialogData,
+														rating: newValue,
+													},
+												}).then((response) => {
+													this.fetchData();
+												});
+											}}
+										/>
+									</TableCell>
+								</TableRow>
+							);
 						})
 					: null }</TableBody>
 				</Table>
@@ -294,7 +321,7 @@ export class MyBookings extends React.Component {
 						{isLoading ? null :
 							rooms.map((row) => {
 								return (
-									<MenuItem value={row.id}>{row.id}</MenuItem>
+									<MenuItem key={row.id} value={row.id}>{row.id}</MenuItem>
 								);
 							})
 						}
@@ -321,6 +348,7 @@ export class MyBookings extends React.Component {
 					<Button
 						variant="contained"
 						color="secondary"
+						onClick={cancelBooking}
 					>
 						CANCEL BOOKING
 					</Button>
