@@ -1,9 +1,11 @@
 from django.shortcuts import render
-from rest_framework import viewsets          
+from rest_framework import viewsets, filters
 from .serializers import CustomerSerializer, RoomSerializer, BookingSerializer     
 from .models import Customer, Room, Booking
 from django.core import serializers
 from django.http import HttpResponse
+import django_filters.rest_framework
+from rest_framework import generics
 
 class CustomerView(viewsets.ModelViewSet): 
       serializer_class = CustomerSerializer          
@@ -13,9 +15,23 @@ class RoomView(viewsets.ModelViewSet):
       serializer_class = RoomSerializer          
       queryset = Room.objects.all()  
 
+
 class BookingView(viewsets.ModelViewSet):       
       serializer_class = BookingSerializer          
       queryset = Booking.objects.all() 
+
+
+# Changing my Bookings: Get all Bookings by User ID for Jacky
+class BookingsList(generics.ListAPIView):
+    serializer_class = BookingSerializer
+
+    def get_queryset(self):
+        queryset = Booking.objects.all()
+        customer = self.request.query_params.get('customer', None)
+        if customer is not None:
+            queryset = queryset.filter(customer=customer)
+        return queryset
+
 
 # Filtering and Adding a Booking Part Queries
 
