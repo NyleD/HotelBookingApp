@@ -3,7 +3,10 @@ from rest_framework import viewsets
 from .serializers import CustomerSerializer, RoomSerializer, BookingSerializer     
 from .models import Customer, Room, Booking
 from django.core import serializers
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+
+from django.db.models import Avg
+from django.db.models import Sum
 
 class CustomerView(viewsets.ModelViewSet): 
       serializer_class = CustomerSerializer          
@@ -15,7 +18,7 @@ class RoomView(viewsets.ModelViewSet):
 
 class BookingView(viewsets.ModelViewSet):       
       serializer_class = BookingSerializer          
-      queryset = Booking.objects.all() 
+      queryset = Booking.objects.all()
 
 # Filtering and Adding a Booking Part Queries
 
@@ -59,6 +62,32 @@ def filterCustomers(request):
                        email = %s''', [name, email])
               qs_json = serializers.serialize('json',queryset)
               return HttpResponse(qs_json, content_type='application/json')
+
+def avgRating(request):
+  serializer_class = BookingSerializer
+  #queryset =  Booking.objects.filter(cancelled=0).aggregate(Avg('rating'))
+  queryset = Booking.objects.raw('''SELECT AVG(rating) FROM hotels_booking WHERE cancelled=0''')
+  qs_json = serializers.serialize('json',queryset)
+  return HttpResponse(qs_json, content_type='application/json')
+
+def sumBookings(request):
+  serializer_class = BookingSerializer
+  queryset = Booking.objects.exclude(cancelled=0).aggregate(Count())
+  qs_json = serializers.serialize('json',queryset)
+  return HttpResponse(qs_json, content_type='application/json')
+
+def sumEmptyRooms(request):
+  return
+
+def mostPopularView(request):
+  serializer_class = BookingSerializer
+  queryset = Booking.objects.raw('''SELECT view
+                                      FROM (SELECT COUNT(*) AS total_bookings, view 
+                                             FROM hotels_booking WHERE cancelled = 0 GROUP BY view) AS view_bookings
+                                      WHERE total_bookings=(SELECT MAX(total_bookings) FROM view_bookings))''')
+  qs_json = serializers.serialize('json',queryset)
+  return HttpResponse(qs_json, content_type='application/json')
+
 
 """
 Removed the features below this as they were regarding the old DB schema

@@ -29,5 +29,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('filterRooms', views.filterRooms),
     path('filterBookings', views.filterBookings),
-    path('filterCustomers', views.filterCustomers)
+    path('filterCustomers', views.filterCustomers),
+    path('sumBookings', views.sumBookings),
+    path('avgRating', views.avgRating)
 ]
