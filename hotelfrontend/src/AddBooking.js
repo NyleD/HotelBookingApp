@@ -7,11 +7,12 @@ export class AddBooking extends React.Component {
 
     state = {
         numGuests: null,
-        numBeds: 0,
+        numBeds: "",
         view: "",
         luxury: "",
         checkin: "",
-        checkout: ""
+        checkout: "",
+        error: null
     };
 
     constructor(props) {
@@ -30,7 +31,8 @@ export class AddBooking extends React.Component {
       }
 
       handleBeds(event) {
-        this.setState({numBeds: event.target.value});
+        this.setState({numBeds: event.target.value.toString()});
+        console.log("beds: ", event.target.value);
       }
 
       handleView(event) {
@@ -50,7 +52,8 @@ export class AddBooking extends React.Component {
       }
 
       handleSubmit(event) {
-        alert('Checkin date is : ' + this.state.checkin);
+      var url = "http://127.0.0.1:8000/filterRooms?beds=1" + "&view=" + this.state.view + "&luxury=" + this.state.luxury;
+        fetch(url).then(response => response.json()).then(data => console.log(data)).catch(console.log("Error"));
         event.preventDefault();
       }
 
@@ -73,7 +76,7 @@ export class AddBooking extends React.Component {
                             <label class="form-check-label"  for="street"> Street</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input"  type="radio" id="garden" name="view" value="garden"  value={this.state.view} onChange={this.handleView} />
+                            <input class="form-check-input"  type="radio" id="Garden View" name="view" value="garden"  value={this.state.view} onChange={this.handleView} />
                             <label class="form-check-label"  for="garden"> Garden</label>
                         </div>
                         <div class="form-check form-check-inline">
@@ -96,7 +99,7 @@ export class AddBooking extends React.Component {
                             <label class="form-check-label" for="single"> Single</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" id="double" name="luxury" value="double"  value={this.state.luxury} onChange={this.handleLuxury} />
+                            <input class="form-check-input" type="radio" id="Double" name="luxury" value="double"  value={this.state.luxury} onChange={this.handleLuxury} />
                             <label class="form-check-label" for="double"> Double</label>
                         </div>
                         <div class="form-check form-check-inline">
