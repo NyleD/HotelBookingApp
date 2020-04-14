@@ -6,6 +6,7 @@ from django.core import serializers
 from django.http import HttpResponse
 import django_filters.rest_framework
 from rest_framework import generics
+from django.db.models import Avg, Count
 
 class CustomerView(viewsets.ModelViewSet): 
       serializer_class = CustomerSerializer          
@@ -76,7 +77,47 @@ def filterCustomers(request):
               qs_json = serializers.serialize('json',queryset)
               return HttpResponse(qs_json, content_type='application/json')
 
-"""
-Removed the features below this as they were regarding the old DB schema
-"""
+from django.http import JsonResponse
 
+def avgRating(request):
+  serializer_class = BookingSerializer
+
+  queryset = Booking.objects.all()
+  queryset = queryset.filter(cancelled=0)
+  queryset = queryset.aggregate(Avg('rating'))
+  print(queryset)
+  return JsonResponse(queryset, safe=False)
+
+
+def sumBookings(request):
+  serializer_class = BookingSerializer
+  queryset = Booking.objects.filter(cancelled=0).count()
+  print(queryset)
+  return JsonResponse(queryset, safe=False)
+
+from datetime import datetime
+def sumEmptyRooms(request):
+    now=datetime.today()
+
+    # Active Bookings
+    bookings = Booking.objects.filter(cancelled=0)
+    bookings = bookings.filter(checkin__lte=now)
+    rooms_booked = bookings.values('room__id').distinct().count()
+    print("rooms_booked__count")
+    print(rooms_booked)
+
+    rooms = Room.objects.all().count()
+    print("rooms_count")
+    print(rooms)
+
+    empty_rooms = rooms - rooms_booked
+    return JsonResponse(empty_rooms, safe=False)
+
+def mostPopularView(request):
+  serializer_class = BookingSerializer
+
+
+  queryset = Booking.objects.filter(cancelled=0).values('room__view').annotate(rooms=Count('room'))
+  queryset = queryset.order_by('rooms').last()
+  print(queryset)
+  return JsonResponse(queryset, safe=False)

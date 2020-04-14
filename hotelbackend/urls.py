@@ -23,7 +23,9 @@ router.register(r'customers', views.CustomerView, 'customer')
 router.register(r'rooms', views.RoomView, 'room')
 router.register(r'bookings', views.RoomView, 'room')
 
-
+# OLiver's Path's
+#path('sumBookings', views.sumBookings),
+    
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,5 +34,9 @@ urlpatterns = [
     path('filterRooms', views.filterRooms),
     path('filterBookings', views.filterBookings),
     path('filterCustomers', views.filterCustomers),
-    
+    path('avgRating', views.avgRating),
+    path('sumBookings', views.sumBookings),
+    path('sumEmptyRooms', views.sumEmptyRooms),
+    path('mostPopularView',views.mostPopularView)
 ]
+
