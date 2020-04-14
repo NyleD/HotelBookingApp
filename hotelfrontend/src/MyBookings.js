@@ -168,6 +168,12 @@ export class MyBookings extends React.Component {
 			return !cancelled && checkinDate > nowDate;
 		};
 
+		const isOngoing = (checkout) => {
+			var checkoutDate = this.stringToDate(checkout);
+			var nowDate = this.today();
+			return nowDate <= checkoutDate;
+		};
+
 		const setRating = (event, row) => {
 			var body = JSON.stringify({
 				booking_id: row.id,
@@ -213,7 +219,7 @@ export class MyBookings extends React.Component {
 					<TableCell>{ row.checkout }</TableCell>
 					<TableCell>{ row.room }</TableCell>
 					<TableCell>{ row.numguests }</TableCell>
-					<TableCell>{ row.cancelled ? "Cancelled" : (isEditable(row.cancelled, row.checkin) ? "Upcoming" : "Completed") }</TableCell>
+					<TableCell>{ row.cancelled ? "Cancelled" : (isEditable(row.cancelled, row.checkin) ? "Upcoming" : (isOngoing(row.checkout) ? "Ongoing" : "Completed")) }</TableCell>
 					<TableCell>
 						<Rating
 							name={"bookingRating"+row.id}
