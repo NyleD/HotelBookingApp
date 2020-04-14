@@ -7,42 +7,71 @@ import Rating from '@material-ui/lab/Rating';
 
 export class StatsBody extends React.Component {
 
-    state = { stats: true };
+    state = { avgRating: null,
+              sumBookings: null,
+              sumEmptyRooms: null,
+              mostPopularView: null
+    };
+
+    componentDidMount() {
+    fetch('http://127.0.0.1:8000/avgRating')
+      .then(response => response.json())
+      .then(data => this.setState({ avgRating: data.rating__avg }));
+
+      fetch('http://127.0.0.1:8000/sumBookings')
+      .then(response => response.json())
+      .then(data => this.setState({ sumBookings: data }));
+
+      fetch('http://127.0.0.1:8000/sumEmptyRooms')
+      .then(response => response.json())
+      .then(data => this.setState({ sumEmptyRooms: data }));
+
+      fetch('http://127.0.0.1:8000/mostPopularView')
+      .then(response => response.json())
+      .then(data => this.setState({ mostPopularView: data.room__view }));
+    }
+
 
     renderStatsBody() {
+        const stats = this.state
+        var rating = parseFloat(stats.avgRating);
+        var rooms = parseInt(stats.sumEmptyRooms);
+        var bookings = parseInt(stats.sumBookings);
+
+        console.log(rating)
         return(
             <div className="container">
             <div className="d-flex justify-content-center">
                 <div className="row">
-                    <div style={{marginTop: '30px'}}> 
+                    <div style={{marginTop: '0px'}}> 
                         <h6>Hotel average rating:</h6>
                     </div>
                 </div>
             </div>
             <div className="d-flex justify-content-center" style={{marginBottom: '60px'}}>
-                <Rating name="half-rating-read" defaultValue={2.5} precision={0.5} readOnly size="large" />
+                <Rating name="half-rating-read" value={rating} precision={0.5} readOnly size="large" />
             </div>
-                <div className="row justify-content-center">
-                    <div class="card-deck">
-                        <div class="card text-center border-0">
+                <div className="row justify-content-center" style={{marginBottom: '60px'}}>
+                    <div className="card-deck">
+                        <div className="card text-center border-0">
                           <img src={stat1} alt="rooms available"/>
-                          <div class="card-body">
-                            <h5 class="card-title">Rooms available:</h5>
-                            <p class="card-text">__</p>
+                          <div className="card-body">
+                            <h5 className="card-title">Rooms available:</h5>
+                            <p className="card-text">{rooms}</p>
                           </div>
                         </div>
-                        <div class="card text-center border-0">
+                        <div className="card text-center border-0">
                           <img src={stat2} alt="number of bookings so far"/>
-                          <div class="card-body">
-                            <h5 class="card-title">Bookings so far:</h5>
-                            <p class="card-text">__</p>
+                          <div className="card-body">
+                            <h5 className="card-title">Customers received so far:</h5>
+                            <p className="card-text">{bookings}</p>
                           </div>
                         </div>
-                        <div class="card text-center border-0">
+                        <div className="card text-center border-0">
                           <img src={stat3} alt="most popular room type"/>
-                          <div class="card-body">
-                            <h5 class="card-title">Most popular view:</h5>
-                            <p class="card-text">__</p>
+                          <div className="card-body">
+                            <h5 className="card-title">Most popular view:</h5>
+                            <p className="card-text">{stats.mostPopularView}</p>
                           </div>
                         </div>
                     </div>
@@ -52,7 +81,7 @@ export class StatsBody extends React.Component {
     }
 
     render() {
-            if(this.state.stats === true) {
+            if(true) {
                 return this.renderStatsBody();
             }
             // else render AppBody

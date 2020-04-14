@@ -10,6 +10,7 @@ export class HomePage extends React.Component {
 
     render(){
         return(
+        <div>
         <div class="container">
             <div class="row">
             <div class="col-sm">
@@ -47,6 +48,11 @@ export class HomePage extends React.Component {
             </div>
             </div>
             </div>
+            <div>
+            <p class="footer"> &copy; BookBookGo 2020. All Rights Reserved. </p>
+            </div>
+            </div>
+
         );
     }
 }
