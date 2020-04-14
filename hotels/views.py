@@ -138,7 +138,6 @@ def modifyBooking(request):
               return HttpResponse(qs_json, content_type='application/json')
 
 
-
 def avgRating(request):
   serializer_class = BookingSerializer
 
@@ -162,6 +161,7 @@ def sumEmptyRooms(request):
     # Active Bookings
     bookings = Booking.objects.filter(cancelled=0)
     bookings = bookings.filter(checkin__lte=now)
+    bookings = bookings.filter(checkout__gte=now)
     rooms_booked = bookings.values('room__id').distinct().count()
     print("rooms_booked__count")
     print(rooms_booked)

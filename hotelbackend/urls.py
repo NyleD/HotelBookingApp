@@ -37,7 +37,7 @@ urlpatterns = [
     path('avgRating', views.avgRating),
     path('sumBookings', views.sumBookings),
     path('sumEmptyRooms', views.sumEmptyRooms),
-    path('mostPopularView',views.mostPopularView)
+    path('mostPopularView',views.mostPopularView),
     path('api/modifyBooking',views.modifyBooking)
 ]
 
