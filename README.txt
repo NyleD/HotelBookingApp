@@ -1,3 +1,5 @@
+// DATABASE:
+// The data for the application is auto generated and processed to fit our data schema. The csv files are manually uploaded to the GCP (under Storage) and manually imported into the Tables.
 // IMPORTANT: Before you start, you should have python3, pip and pipenv installed in your machine
 
 // Open three terminals that are in the same empty folder
@@ -25,6 +27,8 @@ python manage.py runserver
 // If it is not in the project folder:
 //	cd HotelBookingApp/
 //Then run:
+cd hotelfrontend/
+npm install
 npm start
 
 
