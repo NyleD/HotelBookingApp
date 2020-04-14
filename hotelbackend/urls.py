@@ -40,3 +40,4 @@ urlpatterns = [
     path('mostPopularView',views.mostPopularView),
     path('api/modifyBooking',views.modifyBooking)
 ]
+

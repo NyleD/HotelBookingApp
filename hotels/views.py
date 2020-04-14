@@ -181,3 +181,4 @@ def mostPopularView(request):
   queryset = queryset.order_by('rooms').last()
   print(queryset)
   return JsonResponse(queryset, safe=False)
+
