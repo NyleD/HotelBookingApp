@@ -27,6 +27,13 @@ class BookingView(viewsets.ModelViewSet):
 
 # Changing my Bookings: Get all Bookings by User ID for Jacky
 class BookingsList(generics.ListAPIView):
+    """
+    -- Getting all booking made by a customer using thier id
+    
+    SQL Query: 
+    SELECT `hotels_booking`.`id`, `hotels_booking`.`customer_id`, `hotels_booking`.`room_id`, `hotels_booking`.`numguests`, `hotels_booking`.`cancelled`, `hotels_booking`.`checkin`, `hotels_booking`.`checkout`, `hotels_booking`.`rating` FROM `hotels_booking` WHERE `hotels_booking`.`customer_id` = %d
+    """
+
     serializer_class = BookingSerializer
 
     def get_queryset(self):
@@ -39,7 +46,16 @@ class BookingsList(generics.ListAPIView):
 
 # Filtering and Adding a Booking Part Queries
 
+
+
 def filterRooms(request):
+    """
+    -- Getting Room Availablity by beds, view and luxury
+
+    SQL Query: 
+    SELECT `hotels_room`.`id`, `hotels_room`.`beds`, `hotels_room`.`view`, `hotels_room`.`luxury` FROM `hotels_room` WHERE (`hotels_room`.`beds` = %d AND `hotels_room`.`luxury` = %s AND `hotels_room`.`view` = %s)
+    """
+
           serializer_class = RoomSerializer
           queryset = Room.objects.all()
           room_id = request.GET.get('room_id',None)
@@ -53,6 +69,8 @@ def filterRooms(request):
               queryset = queryset.filter(id = room_id)
           qs_json = serializers.serialize('json',queryset)
           return HttpResponse(qs_json, content_type='application/json')
+
+
 
 def filterBookings(request):
           serializer_class = BookingSerializer
@@ -128,6 +146,7 @@ def modifyBooking(request):
                   qs_json = json.dumps({"result":"Fail", "Conflict" : b})
                   return HttpResponse(qs_json, content_type='application/json')
 
+             
               Booking.objects.filter(id=booking_id).update(numguests=numguests,cancelled=cancelled,
                 checkin=checkin, checkout=checkout, customer_id=customer_id,room_id=room_id,rating=rating)
 
