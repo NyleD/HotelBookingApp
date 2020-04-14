@@ -158,6 +158,15 @@ def modifyBooking(request):
 
 
 def avgRating(request):
+ """
+ Finds the Average Rating Given by Customers for Our Hotel Bookings So Far
+
+ SQL Query: 
+ SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED
+ SELECT AVG(`hotels_booking`.`rating`) AS `rating__avg` FROM `hotels_booking` WHERE `hotels_booking`.`cancelled` = 0
+ """
+
+
   serializer_class = BookingSerializer
 
   queryset = Booking.objects.all()
@@ -168,13 +177,39 @@ def avgRating(request):
 
 
 def sumBookings(request):
+
+  """
+  Total Bookings Completed By this Hotel 
+
+  SQL Query:
+  SELECT COUNT(*) AS `__count` FROM `hotels_booking` WHERE `hotels_booking`.`cancelled` = 0
+  """
+
   serializer_class = BookingSerializer
   queryset = Booking.objects.filter(cancelled=0).count()
   print(queryset)
   return JsonResponse(queryset, safe=False)
 
 from datetime import datetime
+
 def sumEmptyRooms(request):
+    """
+    Rooms Currently Empty -> Open to Customers
+
+    SQL Query:
+
+    1) Findings active bookings that are not cancelled 
+
+    SELECT COUNT(*) FROM (SELECT DISTINCT `hotels_booking`.`room_id` AS Col1 FROM `hotels_booking` WHERE (`hotels_booking`.`cancelled` = 0 AND `hotels_booking`.`checkin` <= %date AND `hotels_booking`.`checkout` >= %date
+    
+    2) Find Total Rooms
+
+    SELECT COUNT(*) AS `__count` FROM `hotels_room
+
+
+    return Total Rooms - Active Bookings
+    """
+
     now=datetime.today()
 
     # Active Bookings
@@ -193,6 +228,28 @@ def sumEmptyRooms(request):
     return JsonResponse(empty_rooms, safe=False)
 
 def mostPopularView(request):
+
+  """
+  Find Most Popular View for Hotel Bookings 
+
+  Steps: 
+  Do a Left Outer join of Bookings and Rooms
+  Group By Views 
+  Do a Count on Bookings (NOT Rooms)
+  Order BY ASC
+  Get Last Element
+
+  SQL Query
+
+  SELECT `hotels_room`.`view`, COUNT(`hotels_booking`.`room_id`) AS `rooms` 
+  FROM `hotels_booking` 
+  LEFT OUTER JOIN 
+  `hotels_room` ON (`hotels_booking`.`room_id` = `hotels_room`.`id`) 
+  WHERE `hotels_booking`.`cancelled` = 0 
+  GROUP BY `hotels_room`.`view` ORDER BY `rooms` 
+  DESC LIMIT 1
+  """
+
   serializer_class = BookingSerializer
 
 
