@@ -21,7 +21,7 @@ from hotels import views
 router = routers.DefaultRouter()
 router.register(r'customers', views.CustomerView, 'customer')
 router.register(r'rooms', views.RoomView, 'room')
-router.register(r'bookings', views.RoomView, 'room')
+router.register(r'bookings', views.BookingView, 'booking')
 
 # OLiver's Path's
 #path('sumBookings', views.sumBookings),
@@ -38,5 +38,6 @@ urlpatterns = [
     path('sumBookings', views.sumBookings),
     path('sumEmptyRooms', views.sumEmptyRooms),
     path('mostPopularView',views.mostPopularView)
+    path('api/modifyBooking',views.modifyBooking)
 ]
 

@@ -17,24 +17,30 @@ import Button from '@material-ui/core/Button';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import Snackbar from '@material-ui/core/Snackbar';
+import Alert from '@material-ui/lab/Alert';
 import Rating from '@material-ui/lab/Rating';
 
 import CreateIcon from '@material-ui/icons/Create';
 import CloseIcon from '@material-ui/icons/Close';
 
-const urlBookings = "http://127.0.0.1:8000/api/bookings/";
-const urlRooms = "http://127.0.0.1:8000/api/rooms/";
+const urlBookings = "http://127.0.0.1:8000/api/bookings";
+const urlUpdateBookings = "http://127.0.0.1:8000/api/modifyBooking";
+const urlRooms = "http://127.0.0.1:8000/api/rooms";
 
 export class MyBookings extends React.Component {
 	state = {
 		isLoading: true,
 		bookingData: [],
-		customer: 837,
+		customer: 67,
+		newCustomer: 67,
 		dialogData: {},
 		isDialogOpen: false,
 		rooms: [],
 		validDates: true,
 		validGuests: true,
+		isShowAll: true,
+		bookingError: false,
 	};
 
 	componentDidMount() {
@@ -42,8 +48,8 @@ export class MyBookings extends React.Component {
 	};
 
 	fetchData() {
-		this.fetchBookings(this.state.customer)
-			.then(() => { return this.fetchRooms(); })
+		this.fetchBookings()
+			.then(() => { this.fetchRooms(); })
 			.then(() => {
 				this.setState({
 					isLoading: false,
@@ -51,12 +57,15 @@ export class MyBookings extends React.Component {
 			});
 		};
 
-	fetchBookings(customer) {
-		return fetch(urlBookings)
+	fetchBookings() {
+		return fetch(urlBookings+"?customer="+this.state.newCustomer)
 			.then((response) => { return response.json(); })
 			.then((data) => {
 				this.setState({
 					bookingData: data,
+					isDialogOpen: false,
+					customer: this.state.newCustomer,
+					bookingError: false,
 				});
 			});
 	};
@@ -71,32 +80,69 @@ export class MyBookings extends React.Component {
 			})
 	};
 
-	stringToDate(s) {
-		return Date.UTC(s.substring(0, 4), s.substring(5, 7), s.substring(8, 10));
+	openErrorSnackbar() {
+		this.setState({
+			bookingError: true,
+			isDialogOpen: false,
+		});
 	};
 
+	stringToDate(s) {
+		return Date.UTC(parseInt(s.substring(0, 4)), parseInt(s.substring(5, 7))-1, parseInt(s.substring(8, 10)));
+	};
+
+	today() {
+		var nowDate = new Date();
+		return Date.UTC(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate());
+	}
+
 	renderFilter() {
-		const filterById = (event) => {
+		const { isShowAll } = this.state;
+		const customerChanged = (event) => {
 			this.setState({
-				customer: event.target.value,
-				//isLoading: true,
+				newCustomer: event.target.value,
 			});
-			//this.fetchBookings(event.target.value);
-		}
+		};
+
+		const refreshBookings = (event) => {
+			this.fetchBookings();
+		};
+
+		const toggleDisplay = (event) => {
+			this.setState({
+				isShowAll: !isShowAll,
+			});
+		};
 
 		return(
-			<TextField
-				id="outlined-basic"
-				label="User ID"
-				style={{ margin: 10 }}
-				value={this.state.customer}
-				onChange={filterById}
-			/>
+			<div>
+				<TextField
+					id="outlined-basic"
+					label="User ID"
+					style={{ margin: 10 }}
+					value={this.state.newCustomer}
+					onChange={customerChanged}
+				/>
+				<Button
+					variant="contained"
+					color="primary"
+					onClick={refreshBookings}
+				>
+					Refresh Bookings
+				</Button>
+				<Button
+					variant="contained"
+					color="default"
+					onClick={toggleDisplay}
+				>
+					{ isShowAll ? "Hide" : "Show" } Inactive Bookings
+				</Button>
+			</div>
 		);
 	};
 
 	renderTable() {
-		const { isLoading, bookingData, customer } = this.state;
+		const { isLoading, bookingData, customer, isShowAll, } = this.state;
 		
 		const openDialog = (event, row) => {
 			this.setState({
@@ -110,18 +156,79 @@ export class MyBookings extends React.Component {
 					rating: row.rating,
 					cancelled: row.cancelled,
 				},
+				validDates: true,
+				validGuests: true,
 			});
 		};
 
 		const isEditable = (cancelled, checkin) => {
 			var checkinDate = this.stringToDate(checkin);
-			var nowDate = Date.now();
+			var nowDate = this.today();
 			return !cancelled && checkinDate > nowDate;
 		};
 
+		const setRating = (event, row) => {
+			var body = JSON.stringify({
+				booking_id: row.id,
+				cancelled: row.cancelled,
+				checkin: row.checkin,
+				checkout: row.checkout,
+				customer_id: customer,
+				numguests: row.numguests,
+				room_id: row.room,
+				rating: event.target.value,
+			});
+
+			fetch(urlUpdateBookings, {
+				method: "PUT",
+				body: body,
+			}).then((response) => { return response.json(); })
+			.then((data) => {
+				console.log(data);
+				if (data.result == "Fail") {
+					this.openErrorSnackbar();
+				} else if (data.result == "Success") {
+					this.fetchBookings();
+				}
+			});
+		};
+
+		const rows = bookingData.map((row) => {
+			return(
+				<TableRow
+					key={row.id}
+					selected={!isEditable(row.cancelled, row.checkin)}
+					hidden={!isShowAll && !isEditable(row.cancelled, row.checkin)}
+				>
+					<TableCell size="small">
+						<IconButton
+							onClick={(event) => openDialog(event, row)}
+							hidden={!isEditable(row.cancelled, row.checkin)}
+						>
+							<CreateIcon />
+						</IconButton>
+					</TableCell>
+					<TableCell>{ row.checkin }</TableCell>
+					<TableCell>{ row.checkout }</TableCell>
+					<TableCell>{ row.room }</TableCell>
+					<TableCell>{ row.numguests }</TableCell>
+					<TableCell>{ row.cancelled ? "Cancelled" : (isEditable(row.cancelled, row.checkin) ? "Upcoming" : "Completed") }</TableCell>
+					<TableCell>
+						<Rating
+							name={"bookingRating"+row.id}
+							hidden={row.cancelled ? true : (isEditable(row.cancelled, row.checkin) ? true : false)}
+							value={ row.rating }
+							onChange={(event) => setRating(event, row)}
+						/>
+						{row.cancelled ? "N/A" : (isEditable(row.cancelled, row.checkin) ? "N/A" : "")}
+					</TableCell>
+				</TableRow>
+			);
+		});
+
 		return(
-			<TableContainer component={Paper}>
-				<Table style={{ maxWidth: 1000 }}>
+			<TableContainer component={Paper} style={{ maxWidth: 1000, margin: "auto" }}>
+				<Table>
 					<TableHead>
 						<TableRow>
 							<TableCell></TableCell>
@@ -133,47 +240,7 @@ export class MyBookings extends React.Component {
 							<TableCell>Rating</TableCell>
 						</TableRow>
 					</TableHead>
-					<TableBody>{ !isLoading ?
-						bookingData.map((row) => {
-							if (row.customer == customer) {
-								return(
-									<TableRow key={row.id} selected={!isEditable(row.cancelled, row.checkin)} >
-										<TableCell size="small">
-											<IconButton
-												onClick={(event) => openDialog(event, row)}
-												hidden={!isEditable(row.cancelled, row.checkin)}
-											>
-												<CreateIcon />
-											</IconButton>
-										</TableCell>
-										<TableCell>{ row.checkin }</TableCell>
-										<TableCell>{ row.checkout }</TableCell>
-										<TableCell>{ row.room }</TableCell>
-										<TableCell>{ row.numguests }</TableCell>
-										<TableCell>{ row.cancelled ? "Cancelled" : (isEditable(row.cancelled, row.checkin) ? "Upcoming" : "Completed") }</TableCell>
-										<TableCell>
-											<Rating
-												name="bookingRating"
-												hidden={row.cancelled ? true : (isEditable(row.cancelled, row.checkin) ? true : false)}
-												value={ row.rating }
-												onChange={(event, newValue) => {
-													fetch(urlBookings, {
-														method: "PUT",
-														body: {...this.state.dialogData,
-															rating: newValue,
-														},
-													}).then((response) => {
-														this.fetchData();
-													});
-												}}
-											/>
-										</TableCell>
-									</TableRow>
-								);
-							}
-							return null;
-						})
-					: null }</TableBody>
+					<TableBody>{ !isLoading ? rows : null }</TableBody>
 				</Table>
 			</TableContainer>
 		);
@@ -181,7 +248,7 @@ export class MyBookings extends React.Component {
 
 	renderDialog() {
 		const isOpen = this.state.isDialogOpen;
-		const { isLoading, validDates, validGuests, dialogData, rooms } = this.state;
+		const { isLoading, validDates, validGuests, dialogData, rooms, customer } = this.state;
 
 		const closeDialog = () => {
 			this.setState({
@@ -190,9 +257,14 @@ export class MyBookings extends React.Component {
 		};
 
 		const validateDates = (checkin, checkout) => {
-			if (checkin == '' || checkout == '')
+			if (checkin == undefined || checkout == undefined || checkin == '' || checkout == '')
 				return false;
-			return this.stringToDate(checkin) <= this.stringToDate(checkout);
+
+			var checkinDate = this.stringToDate(checkin);
+			var checkoutDate = this.stringToDate(checkout);
+			var nowDate = this.today();
+
+			return nowDate < checkinDate && checkinDate <= checkoutDate;
 		};
 
 		const validateGuests = (num) => {
@@ -200,34 +272,59 @@ export class MyBookings extends React.Component {
 		};
 
 		const validateData = () => {
-			return validateDates() && validateGuests();
+			return validateDates(dialogData.checkin, dialogData.checkout) && validateGuests();
 		};
 
 		const updateBooking = () => {
-			if (!validateData()) {
-				//TODO: Error handling
-				return;
-			}
-			fetch(urlBookings, {
+			var body = JSON.stringify({
+				booking_id: dialogData.id,
+				cancelled: dialogData.cancelled,
+				checkin: dialogData.checkin,
+				checkout: dialogData.checkout,
+				customer_id: customer,
+				numguests: dialogData.numguests,
+				room_id: dialogData.room,
+				rating: dialogData.rating,
+			});
+
+			fetch(urlUpdateBookings, {
 				method: "PUT",
-				body: dialogData,
-			}).then((response) => { console.log(response.json()); });
+				body: body,
+			}).then((response) => { return response.json(); })
+			.then((data) => {
+				console.log(data);
+				if (data.result == "Fail") {
+					this.openErrorSnackbar();
+				} else if (data.result == "Success") {
+					this.fetchBookings();
+				}
+			});
 		};
 
 		const cancelBooking = () => {
-			fetch(urlBookings, {
+			var body = JSON.stringify({
+				booking_id: dialogData.id,
+				cancelled: true,
+				checkin: dialogData.checkin,
+				checkout: dialogData.checkout,
+				customer_id: customer,
+				numguests: dialogData.numguests,
+				room_id: dialogData.room,
+				rating: dialogData.rating,
+			});
+
+			fetch(urlUpdateBookings, {
 				method: "PUT",
-				body: {
-					id: dialogData.id,
-					customer: this.state.customer,
-					checkin: dialogData.checkin,
-					checkout: dialogData.checkout,
-					room: dialogData.room,
-					numguests: dialogData.numguests,
-					rating: dialogData.rating,
-					cancelled: true,
+				body: body,
+			}).then((response) => { return response.json(); })
+			.then((data) => {
+				console.log(data);
+				if (data.result == "Fail") {
+					this.openErrorSnackbar();
+				} else if (data.result == "Success") {
+					this.fetchBookings();
 				}
-			}).then((response) => { console.log(response.json()); });
+			});
 		};
 
 		return(
@@ -294,7 +391,7 @@ export class MyBookings extends React.Component {
 						{isLoading ? null :
 							rooms.map((row) => {
 								return (
-									<MenuItem value={row.id}>{row.id}</MenuItem>
+									<MenuItem key={row.id} value={row.id}>{row.id}</MenuItem>
 								);
 							})
 						}
@@ -321,6 +418,7 @@ export class MyBookings extends React.Component {
 					<Button
 						variant="contained"
 						color="secondary"
+						onClick={cancelBooking}
 					>
 						CANCEL BOOKING
 					</Button>
@@ -328,6 +426,7 @@ export class MyBookings extends React.Component {
 						variant="contained"
 						color="primary"
 						onClick={updateBooking}
+						disabled={!validDates || !validGuests}
 					>
 						UPDATE BOOKING
 					</Button>
@@ -336,13 +435,36 @@ export class MyBookings extends React.Component {
 		);
 	};
 
+	renderSnackbar() {
+		const { bookingError } = this.state;
+
+		const closeSnackbar = (event) => {
+			this.setState({
+				bookingError: false,
+			});
+		};
+
+		return (
+			<Snackbar
+				open={bookingError}
+				autoHideDuration={5000}
+				onClose={closeSnackbar}
+			>
+				<Alert onClose={closeSnackbar} severity="error">
+					The changes conflict with another booking.
+				</Alert>
+			</Snackbar>
+		);
+	};
+
 	render() {
 		return(
-			<div style={{ margin: 10 }}>
-				<h1>My Bookings</h1>
+			<div style={{ "textAlign":"center" }}>
+				<h1>My Bookings</h1><br/>
 				{ this.renderFilter() }
 				{ this.renderTable() }
 				{ this.renderDialog() }
+				{ this.renderSnackbar() }
 			</div>
 		);
 	};
