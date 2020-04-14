@@ -85,7 +85,7 @@ export class MyBookings extends React.Component {
 			bookingError: true,
 			isDialogOpen: false,
 		});
-	}
+	};
 
 	stringToDate(s) {
 		return Date.UTC(parseInt(s.substring(0, 4)), parseInt(s.substring(5, 7))-1, parseInt(s.substring(8, 10)));
