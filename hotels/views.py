@@ -130,7 +130,7 @@ def modifyBooking(request):
 
               qs_json = json.loads(serializers.serialize('json',Booking.objects.filter(id=booking_id)))
               qs_json[0]["result"] = "Success"
-
+              qs_json = json.dumps(qs_json)
               # qs_json["result"] = "Success"
               return HttpResponse(qs_json, content_type='application/json')
 
