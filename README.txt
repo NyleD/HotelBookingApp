@@ -33,3 +33,19 @@ npm start
 
 
 // To access the application, open the browser, go to localhost:3000
+
+## Final Features
+● Filter rooms that match search criteria
+● Check these rooms against existing bookings on those rooms and present
+results that don’t overlap with existing bookings
+● Favourite / Unfavourite results to save them to book later (This feature uses the
+browser’s local storage and not the prod. DB like the other features)
+● If customer enters details, create booking under old customer id if customer
+exists, if not, create a new customer and then create a new booking
+● Update a booking
+● Cancel a booking.
+● Rate a booking.
+● Display the hotel’s average rating.
+● Display the number of rooms currently available at the hotel.
+● Display the number of customers received so far.
+● Display the most popular type of view at the hotel.
