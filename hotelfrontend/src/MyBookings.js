@@ -48,7 +48,7 @@ export class MyBookings extends React.Component {
 	};
 
 	fetchData() {
-		this.fetchBookings()
+		this.fetchBookings(false)
 			.then(() => { this.fetchRooms(); })
 			.then(() => {
 				this.setState({
@@ -57,14 +57,15 @@ export class MyBookings extends React.Component {
 			});
 		};
 
-	fetchBookings() {
-		return fetch(urlBookings+"?customer="+this.state.newCustomer)
+	fetchBookings(isUpdated) {
+		return fetch(urlBookings+"?customer="+ (isUpdated ? this.state.customer : this.state.newCustomer))
 			.then((response) => { return response.json(); })
 			.then((data) => {
 				this.setState({
 					bookingData: data,
 					isDialogOpen: false,
-					customer: this.state.newCustomer,
+					customer: isUpdated ? this.state.customer : this.state.newCustomer,
+					newCustomer: isUpdated ? this.state.customer : this.state.newCustomer,
 					bookingError: false,
 				});
 			});
@@ -105,7 +106,7 @@ export class MyBookings extends React.Component {
 		};
 
 		const refreshBookings = (event) => {
-			this.fetchBookings();
+			this.fetchBookings(false);
 		};
 
 		const toggleDisplay = (event) => {
@@ -167,6 +168,12 @@ export class MyBookings extends React.Component {
 			return !cancelled && checkinDate > nowDate;
 		};
 
+		const isOngoing = (checkout) => {
+			var checkoutDate = this.stringToDate(checkout);
+			var nowDate = this.today();
+			return nowDate <= checkoutDate;
+		};
+
 		const setRating = (event, row) => {
 			var body = JSON.stringify({
 				booking_id: row.id,
@@ -188,7 +195,7 @@ export class MyBookings extends React.Component {
 				if (data.result == "Fail") {
 					this.openErrorSnackbar();
 				} else if (data.result == "Success") {
-					this.fetchBookings();
+					this.fetchBookings(true);
 				}
 			});
 		};
@@ -212,7 +219,7 @@ export class MyBookings extends React.Component {
 					<TableCell>{ row.checkout }</TableCell>
 					<TableCell>{ row.room }</TableCell>
 					<TableCell>{ row.numguests }</TableCell>
-					<TableCell>{ row.cancelled ? "Cancelled" : (isEditable(row.cancelled, row.checkin) ? "Upcoming" : "Completed") }</TableCell>
+					<TableCell>{ row.cancelled ? "Cancelled" : (isEditable(row.cancelled, row.checkin) ? "Upcoming" : (isOngoing(row.checkout) ? "Ongoing" : "Completed")) }</TableCell>
 					<TableCell>
 						<Rating
 							name={"bookingRating"+row.id}
@@ -296,7 +303,7 @@ export class MyBookings extends React.Component {
 				if (data.result == "Fail") {
 					this.openErrorSnackbar();
 				} else if (data.result == "Success") {
-					this.fetchBookings();
+					this.fetchBookings(true);
 				}
 			});
 		};
@@ -322,7 +329,7 @@ export class MyBookings extends React.Component {
 				if (data.result == "Fail") {
 					this.openErrorSnackbar();
 				} else if (data.result == "Success") {
-					this.fetchBookings();
+					this.fetchBookings(true);
 				}
 			});
 		};

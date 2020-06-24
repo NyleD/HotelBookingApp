@@ -58,19 +58,20 @@ def filterRooms(request):
     SELECT `hotels_room`.`id`, `hotels_room`.`beds`, `hotels_room`.`view`, `hotels_room`.`luxury` FROM `hotels_room` WHERE (`hotels_room`.`beds` = %d AND `hotels_room`.`luxury` = %s AND `hotels_room`.`view` = %s)
     """
 
-          serializer_class = RoomSerializer
-          queryset = Room.objects.all()
-          room_id = request.GET.get('room_id',None)
-          beds = request.GET.get('beds',None)
-          view = request.GET.get('view',None)
-          luxury = request.GET.get('luxury',None)
 
-          if beds and view and luxury:
-              queryset = queryset.filter(beds = beds, view = view, luxury = luxury)
-          elif room_id:
-              queryset = queryset.filter(id = room_id)
-          qs_json = serializers.serialize('json',queryset)
-          return HttpResponse(qs_json, content_type='application/json')
+    serializer_class = RoomSerializer
+    queryset = Room.objects.all()
+    room_id = request.GET.get('room_id',None)
+    beds = request.GET.get('beds',None)
+    view = request.GET.get('view',None)
+    luxury = request.GET.get('luxury',None)
+
+    if beds and view and luxury:
+        queryset = queryset.filter(beds = beds, view = view, luxury = luxury)
+    elif room_id:
+        queryset = queryset.filter(id = room_id)
+    qs_json = serializers.serialize('json',queryset)
+    return HttpResponse(qs_json, content_type='application/json')
 
 
 
@@ -103,6 +104,14 @@ def filterCustomers(request):
 
 @csrf_exempt
 def modifyBooking(request):
+          """
+          -- Update an existing booking
+
+          SQL Query: 
+          UPDATE `hotels_booking` SET ``hotels_booking`.`numguests` = %d, `hotels_booking`.`cancelled` = %d, `hotels_booking`.`checkin` = %s,
+          `hotels_booking`.`checkout` = %s, `hotels_booking`.`customer_id` = %d, `hotels_booking`.`room_id` = %d, `hotels_booking`.`rating` = %d
+          WHERE `hotels_booking`.`id` = %d
+          """
           if request.method == 'PUT':
               
               json_data = json.loads(request.body)
@@ -159,23 +168,21 @@ def modifyBooking(request):
               return HttpResponse(qs_json, content_type='application/json')
 
 
+
 def avgRating(request):
- """
- Finds the Average Rating Given by Customers for Our Hotel Bookings So Far
+      """
+      Finds the Average Rating Given by Customers for Our Hotel Bookings So Far
 
- SQL Query: 
- SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED
- SELECT AVG(`hotels_booking`.`rating`) AS `rating__avg` FROM `hotels_booking` WHERE `hotels_booking`.`cancelled` = 0
- """
-
-
-  serializer_class = BookingSerializer
-
-  queryset = Booking.objects.all()
-  queryset = queryset.filter(cancelled=0)
-  queryset = queryset.aggregate(Avg('rating'))
-  print(queryset)
-  return JsonResponse(queryset, safe=False)
+      SQL Query: 
+      SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED
+      SELECT AVG(`hotels_booking`.`rating`) AS `rating__avg` FROM `hotels_booking` WHERE `hotels_booking`.`cancelled` = 0
+      """
+      serializer_class = BookingSerializer
+      queryset = Booking.objects.all()
+      queryset = queryset.filter(cancelled=0)
+      queryset = queryset.aggregate(Avg('rating'))
+      print(queryset)
+      return JsonResponse(queryset, safe=False)
 
 
 def sumBookings(request):
