@@ -11,6 +11,8 @@ from django.db.models import Avg, Count
 import json
 from django.http import JsonResponse
 
+
+
 class CustomerView(viewsets.ModelViewSet): 
       serializer_class = CustomerSerializer          
       queryset = Customer.objects.all()              
